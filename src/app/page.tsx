@@ -41,12 +41,28 @@ const Home = () => {
   const getAccessLogs = useCallback(
     (doorId: number) => {
       api
-        .get<{ error: boolean; content: AccessLog[] }>(`/access/${doorId}`, {
+        .get<{ error: boolean; content: any[] }>(`/access/${doorId}`, {
           headers: {
             Authorization: `Bearer ${authUser?.token}`,
           },
         })
-        .then((response) => setLogs(response.data.content))
+        .then((response) => {
+          const convertedData = response.data.content.map((item) => {
+            return {
+              name: item.name,
+              carBrand: item.car_brand,
+              carColor: item.car_color,
+              carPlate: item.car_plate,
+              entranceHour: item.entrance_hour,
+              entranceDay: item.entrance_day,
+              doorId: item.id_door,
+              visitLocation: item.visit_location,
+              checked: item.checked,
+            };
+          });
+
+          setLogs([...(convertedData as AccessLog[])]);
+        })
         .catch(console.log);
     },
     [authUser]
