@@ -13,7 +13,9 @@ const Dropdown: FC<DropdownProps> = ({ items, className, ...props }) => {
   return (
     <select className={`px-4 py-2 rounded-lg  ${className || ''}`} {...props}>
       {items.map((item) => (
-        <option value={`door-${item.id}`}>{item.name}</option>
+        <option key={`item-${item.id}`} value={item.id}>
+          {item.name}
+        </option>
       ))}
     </select>
   );
