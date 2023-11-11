@@ -47,6 +47,7 @@ const Home = () => {
           },
         })
         .then((response) => {
+          // Change variables from snake case to camel case
           const convertedData = response.data.content.map((item) => {
             return {
               name: item.name,
@@ -67,6 +68,19 @@ const Home = () => {
     },
     [authUser]
   );
+
+  const getExpiredLogs = useCallback(() => {
+    const currentTime = new Date();
+
+    return logs.filter((item) => {
+      const logTime = new Date(item.entranceHour);
+      const timeDiff = currentTime.valueOf() - logTime.valueOf();
+
+      console.log(currentTime.valueOf(), logTime.valueOf());
+
+      return true;
+    });
+  }, [logs]);
 
   useEffect(() => {
     if (authUser) {
@@ -93,7 +107,7 @@ const Home = () => {
   return (
     <>
       {/* Content */}
-      <div className='flex flex-col'>
+      <div className='flex flex-col h-screen'>
         {/* Header */}
         <div className='flex bg-orange-600 text-neutral-50 text-center py-3 px-3 justify-between items-center'>
           <h1
@@ -109,10 +123,21 @@ const Home = () => {
           />
         </div>
         {/* Content */}
-        <div className='flex flex-col'>
-          {logs.map((item) => (
-            <AccessItem key={`log-${item.id}`} {...item} />
-          ))}
+        <div className='flex flex-col flex-1'>
+          <div className='flex flex-col m-2 h-1/2'>
+            <h2 className='mb-3 text-2xl font-bold border-b pb-2'>Activos</h2>
+            {logs.map((item) => (
+              <AccessItem key={`log-${item.id}`} {...item} />
+            ))}
+          </div>
+          <div className='flex flex-col m-2 h-1/2'>
+            <h2 className='mb-3 text-2xl font-bold border-b pb-2'>
+              Caducados o anteriores
+            </h2>
+            {getExpiredLogs().map((item) => (
+              <AccessItem key={`log-${item.id}`} {...item} />
+            ))}
+          </div>
         </div>
       </div>
     </>
