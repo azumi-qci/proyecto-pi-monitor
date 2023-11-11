@@ -23,7 +23,7 @@ const AccessItem: FC<AccessItemProps> = ({
   };
 
   return (
-    <div className='flex gap-x-6 p-6 border rounded-md shadow-md bg-neutral-50 hover:bg-neutral-100'>
+    <div className='flex gap-x-6 p-6 mb-2 border rounded-md shadow-md bg-neutral-50 hover:bg-neutral-100'>
       <p className='flex items-center justify-center w-1/12'>
         {getFormatedDate(entranceDay)}
       </p>
@@ -34,7 +34,7 @@ const AccessItem: FC<AccessItemProps> = ({
       <p className='flex items-center justify-center w-1/12'>{carPlate}</p>
       <p className='flex items-center justify-center w-3/12'>{visitLocation}</p>
       <p className='flex items-center justify-center w-1/12'>
-        <Button>Acceso</Button>
+        <Button>{checked ? 'Anular' : 'Acceso'}</Button>
       </p>
     </div>
   );

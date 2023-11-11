@@ -16,6 +16,7 @@ import { socket } from '@monitor/socket';
 import { api } from '@monitor/api';
 
 import { toCamelCase } from '@monitor/helpers/toCamelCase';
+import { getTimeDifference } from '@monitor/helpers/getTimeDifference';
 
 import config from '../../config.json';
 
@@ -26,7 +27,7 @@ const Home = () => {
   const [logs, setLogs] = useState<AccessLog[]>([]);
   const [currentDoor, setCurrentDoor] = useState(0);
 
-  const getAvailableDoors = useCallback(() => {
+  const fetchAvailableDoors = useCallback(() => {
     api
       .get<{ error: boolean; content: Door[] }>('/doors', {
         headers: {
@@ -42,7 +43,7 @@ const Home = () => {
       .catch(console.log);
   }, [authUser]);
 
-  const getAccessLogs = useCallback(
+  const fetchAccessLogs = useCallback(
     (doorId: number) => {
       api
         .get<{ error: boolean; content: any[] }>(`/access/${doorId}`, {
@@ -65,17 +66,28 @@ const Home = () => {
     [authUser]
   );
 
-  const getExpiredLogs = useCallback(() => {
-    const currentTime = new Date();
+  const getLogs = useCallback(
+    (expired = false) => {
+      const currentTime = new Date();
 
-    return logs.filter((item) => {
-      const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
-      const timeDiff = Math.abs(currentTime.getTime() - logTime.getTime());
-      const timeDiffMin = Math.floor(timeDiff / 1000 / 60);
+      if (expired) {
+        return logs.filter((item) => {
+          const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
+          const timeDiff = getTimeDifference(currentTime, logTime);
 
-      return config.ALLOW_TIME_DIFFERENCE < timeDiffMin;
-    });
-  }, [logs]);
+          return config.ALLOW_TIME_DIFFERENCE < timeDiff || item.checked;
+        });
+      }
+
+      return logs.filter((item) => {
+        const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
+        const timeDiff = getTimeDifference(currentTime, logTime);
+
+        return config.ALLOW_TIME_DIFFERENCE > timeDiff;
+      });
+    },
+    [logs]
+  );
 
   const onLogout = useCallback(() => {
     // Delete token from localStorage
@@ -86,19 +98,6 @@ const Home = () => {
     setCurrentDoor(0);
     setLogs([]);
   }, []);
-
-  useEffect(() => {
-    if (authUser) {
-      // Get initial data
-      getAvailableDoors();
-    }
-  }, [authUser]);
-
-  useEffect(() => {
-    if (currentDoor > 0) {
-      getAccessLogs(currentDoor);
-    }
-  }, [currentDoor]);
 
   const onSocketUpdateLog = useCallback(
     (updatedLog: AccessLog) => {
@@ -116,6 +115,31 @@ const Home = () => {
     },
     [logs]
   );
+
+  const onSocketAddLog = useCallback(
+    (newLog: AccessLog) => {
+      const tempList = [...logs];
+      const newItem = toCamelCase(newLog);
+
+      tempList.push(newItem);
+
+      setLogs([...tempList]);
+    },
+    [logs]
+  );
+
+  useEffect(() => {
+    if (authUser) {
+      // Get initial data
+      fetchAvailableDoors();
+    }
+  }, [authUser]);
+
+  useEffect(() => {
+    if (currentDoor > 0) {
+      fetchAccessLogs(currentDoor);
+    }
+  }, [currentDoor]);
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
@@ -139,9 +163,11 @@ const Home = () => {
 
   useEffect(() => {
     socket.on('update-log', onSocketUpdateLog);
+    socket.on('add-log', onSocketAddLog);
 
     return () => {
       socket.off('update-log', onSocketUpdateLog);
+      socket.off('update-log', onSocketAddLog);
     };
   }, [logs]);
 
@@ -168,7 +194,7 @@ const Home = () => {
       {/* Log out button */}
       <LogoutButton onLogout={onLogout} />
       {/* Content */}
-      <div className='flex flex-col h-screen'>
+      <div className='flex flex-col h-screen overflow-hidden'>
         {/* Header */}
         <div className='flex bg-orange-600 text-neutral-50 text-center py-3 px-3 justify-between items-center'>
           <h1
@@ -184,20 +210,24 @@ const Home = () => {
           />
         </div>
         {/* Content */}
-        <div className='flex flex-col flex-1'>
+        <div className='flex flex-col flex-1 max-h-full overflow-hidden'>
           <div className='flex flex-col m-2 h-1/2'>
             <h2 className='mb-3 text-2xl font-bold border-b pb-2'>Activos</h2>
-            {logs.map((item) => (
-              <AccessItem key={`log-${item.id}`} {...item} />
-            ))}
+            <div className='max-h-full overflow-y-auto'>
+              {getLogs().map((item) => (
+                <AccessItem key={`log-${item.id}`} {...item} />
+              ))}
+            </div>
           </div>
           <div className='flex flex-col m-2 h-1/2'>
             <h2 className='mb-3 text-2xl font-bold border-b pb-2'>
               Expirados o anteriores
             </h2>
-            {getExpiredLogs().map((item) => (
-              <AccessItem key={`log-${item.id}`} {...item} />
-            ))}
+            <div className='max-h-full overflow-y-auto'>
+              {getLogs(true).map((item) => (
+                <AccessItem key={`log-expired-${item.id}`} {...item} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
