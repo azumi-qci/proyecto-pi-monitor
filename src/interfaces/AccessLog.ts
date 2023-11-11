@@ -6,7 +6,7 @@ export interface AccessLog {
   carPlate: string;
   entranceHour: string;
   entranceDay: string;
-  doorId: string;
+  doorId: number;
   visitLocation: string;
   checked: boolean;
 }

@@ -105,8 +105,10 @@ const Home = () => {
       const logIndex = logs.findIndex((item) => item.id === updatedLog.id);
 
       if (logIndex !== -1) {
-        const tempItem = { ...logs[logIndex], ...toCamelCase(updatedLog) };
         const tempList = [...logs];
+        const newItem = toCamelCase(updatedLog);
+
+        const tempItem = { ...logs[logIndex], ...newItem };
         tempList.splice(logIndex, 1, tempItem);
 
         setLogs([...tempList]);
