@@ -27,6 +27,10 @@ const Home = () => {
   const [logs, setLogs] = useState<AccessLog[]>([]);
   const [currentDoor, setCurrentDoor] = useState(0);
 
+  /**
+   * Fetches all the registered doors in database
+   * and saves them in the state
+   */
   const fetchAvailableDoors = useCallback(() => {
     api
       .get<{ error: boolean; content: Door[] }>('/doors', {
@@ -43,6 +47,10 @@ const Home = () => {
       .catch(console.log);
   }, [authUser]);
 
+  /**
+   * Fetches all the access logs of the current door
+   * and saves them in the state
+   */
   const fetchAccessLogs = useCallback(
     (doorId: number) => {
       api
@@ -66,6 +74,10 @@ const Home = () => {
     [authUser]
   );
 
+  /**
+   * Returns a list of available access logs of the current door
+   * @param expired - If `true`, only expired or previusly accessed logs will be returned
+   */
   const getLogs = useCallback(
     (expired = false) => {
       const currentTime = new Date();
@@ -89,6 +101,10 @@ const Home = () => {
     [logs]
   );
 
+  /**
+   * Resets all the application state when the user
+   * logs out of the system
+   */
   const onLogout = useCallback(() => {
     // Delete token from localStorage
     localStorage.removeItem('auth_token');
@@ -99,11 +115,14 @@ const Home = () => {
     setLogs([]);
   }, []);
 
+  /**
+   * Add a new access log when received via socket (real time)
+   */
   const onSocketUpdateLog = useCallback(
     (updatedLog: AccessLog) => {
       const logIndex = logs.findIndex((item) => item.id === updatedLog.id);
 
-      if (logIndex !== -1) {
+      if (logIndex > -1) {
         const tempList = [...logs];
         const newItem = toCamelCase(updatedLog);
 
@@ -116,6 +135,9 @@ const Home = () => {
     [logs]
   );
 
+  /**
+   * Updates a accses log when received via socket (real time)
+   */
   const onSocketAddLog = useCallback(
     (newLog: AccessLog) => {
       const tempList = [...logs];
@@ -126,6 +148,44 @@ const Home = () => {
       setLogs([...tempList]);
     },
     [logs]
+  );
+
+  /**
+   * Sets the `checked` flag to `1` when received via socket (real time)
+   */
+  const onSocketCheckLog = useCallback(
+    (id: number) => {
+      const logIndex = logs.findIndex((item) => item.id === id);
+
+      if (logIndex > -1) {
+        const tempList = [...logs];
+        const tempItem = { ...logs[logIndex], checked: true };
+
+        tempList.splice(logIndex, 1, tempItem);
+
+        setLogs([...tempList]);
+      }
+    },
+    [logs]
+  );
+
+  /**
+   * Tells the server that a access log has
+   * now been registed
+   * @param id - Access log id
+   */
+  const setAccessLogAsChecked = useCallback(
+    (id: number, doorId: number) => {
+      api
+        .put(`/access/check/${doorId}/${id}`, null, {
+          headers: {
+            Authorization: `Bearer ${authUser?.token}`,
+          },
+        })
+        .then(console.log)
+        .catch(console.warn);
+    },
+    [authUser]
   );
 
   useEffect(() => {
@@ -164,10 +224,12 @@ const Home = () => {
   useEffect(() => {
     socket.on('update-log', onSocketUpdateLog);
     socket.on('add-log', onSocketAddLog);
+    socket.on('check-log', onSocketCheckLog);
 
     return () => {
       socket.off('update-log', onSocketUpdateLog);
       socket.off('update-log', onSocketAddLog);
+      socket.off('check-log', onSocketCheckLog);
     };
   }, [logs]);
 
