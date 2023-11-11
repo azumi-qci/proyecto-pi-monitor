@@ -83,7 +83,7 @@ const Home = () => {
         const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
         const timeDiff = getTimeDifference(currentTime, logTime);
 
-        return config.ALLOW_TIME_DIFFERENCE > timeDiff;
+        return config.ALLOW_TIME_DIFFERENCE > timeDiff && !item.checked;
       });
     },
     [logs]
@@ -190,48 +190,45 @@ const Home = () => {
   }
 
   return (
-    <>
+    <div className='flex flex-col h-screen overflow-hidden'>
+      {/* Header */}
+      <div className='flex bg-orange-600 text-neutral-50 text-center py-3 px-3 justify-between items-center'>
+        <h1
+          className='font-bold text-3xl uppercase'
+          onClick={() => socket.emit('join-room', 1)}
+        >
+          Monitoreo de entrada - CUCEI
+        </h1>
+        <Dropdown
+          className='text-neutral-800'
+          items={doors}
+          onChange={(e) => setCurrentDoor(parseInt(e.target.value))}
+        />
+      </div>
       {/* Log out button */}
       <LogoutButton onLogout={onLogout} />
       {/* Content */}
-      <div className='flex flex-col h-screen overflow-hidden'>
-        {/* Header */}
-        <div className='flex bg-orange-600 text-neutral-50 text-center py-3 px-3 justify-between items-center'>
-          <h1
-            className='font-bold text-3xl uppercase'
-            onClick={() => socket.emit('join-room', 1)}
-          >
-            Monitoreo de entrada - CUCEI
-          </h1>
-          <Dropdown
-            className='text-neutral-800'
-            items={doors}
-            onChange={(e) => setCurrentDoor(parseInt(e.target.value))}
-          />
-        </div>
-        {/* Content */}
-        <div className='flex flex-col flex-1 max-h-full overflow-hidden'>
-          <div className='flex flex-col m-2 h-1/2'>
-            <h2 className='mb-3 text-2xl font-bold border-b pb-2'>Activos</h2>
-            <div className='max-h-full overflow-y-auto'>
-              {getLogs().map((item) => (
-                <AccessItem key={`log-${item.id}`} {...item} />
-              ))}
-            </div>
+      <div className='flex flex-col flex-1 max-h-full overflow-hidden'>
+        <div className='flex flex-col m-2 h-1/2'>
+          <h2 className='mb-3 text-2xl font-bold border-b pb-2'>Activos</h2>
+          <div className='max-h-full overflow-y-auto'>
+            {getLogs().map((item) => (
+              <AccessItem key={`log-${item.id}`} {...item} />
+            ))}
           </div>
-          <div className='flex flex-col m-2 h-1/2'>
-            <h2 className='mb-3 text-2xl font-bold border-b pb-2'>
-              Expirados o anteriores
-            </h2>
-            <div className='max-h-full overflow-y-auto'>
-              {getLogs(true).map((item) => (
-                <AccessItem key={`log-expired-${item.id}`} {...item} />
-              ))}
-            </div>
+        </div>
+        <div className='flex flex-col m-2 h-1/2'>
+          <h2 className='mb-3 text-2xl font-bold border-b pb-2'>
+            Expirados o anteriores
+          </h2>
+          <div className='max-h-full overflow-y-auto'>
+            {getLogs(true).map((item) => (
+              <AccessItem key={`log-expired-${item.id}`} {...item} />
+            ))}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

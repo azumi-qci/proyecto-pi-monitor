@@ -10,7 +10,7 @@ interface LogoutButtonProps {
 
 const LogoutButton: FC<LogoutButtonProps> = ({ onLogout }) => {
   return (
-    <div className='flex absolute bottom-2 left-2'>
+    <div className='flex justify-end m-2'>
       <Button onClick={onLogout}>
         <FontAwesomeIcon icon={faRightFromBracket} className='mr-2' />
         Cerrar sesión
