@@ -1,4 +1,6 @@
 import { FC, useCallback, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faKey, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 import { Input } from '@monitor/components/Input';
 import { Button } from '@monitor/components/Button';
@@ -34,7 +36,12 @@ const LoginScreen: FC<LoginScreenProps> = ({ onSuccessLogin }) => {
         email: data.email.trim(),
         password: data.password.trim(),
       })
-      .then((response) => onSuccessLogin(response.data.content))
+      .then((response) => {
+        // Save token in localStorage
+        localStorage.setItem('auth_token', response.data.content.token);
+        // Continue with the system
+        onSuccessLogin(response.data.content);
+      })
       .catch((e) => {
         const error = e as AxiosError<{ error: string; message: string }>;
 
@@ -53,6 +60,7 @@ const LoginScreen: FC<LoginScreenProps> = ({ onSuccessLogin }) => {
     <div className='flex w-screen h-screen justify-center items-center'>
       <div className='px-6 py-4 shadow-2xl rounded-lg w-full max-w-md'>
         <h2 className='font-bold uppercase text-center text-2xl pb-6 mb-6 border-b-2 text-neutral-800'>
+          <FontAwesomeIcon icon={faKey} className='mr-2' />
           Iniciar sesión
         </h2>
         <div className='flex flex-col'>
@@ -72,7 +80,14 @@ const LoginScreen: FC<LoginScreenProps> = ({ onSuccessLogin }) => {
             value={data.password}
           />
           <Button onClick={sendData} disabled={sending}>
-            {sending ? 'Entrando...' : 'Entrar'}
+            {sending ? (
+              <>
+                <FontAwesomeIcon icon={faSpinner} spinPulse className='mr-2' />
+                Entrando...
+              </>
+            ) : (
+              'Entrar'
+            )}
           </Button>
           {errorMessage ? (
             <p className='text-red-700 text-right mt-3'>{errorMessage}</p>

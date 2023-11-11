@@ -1,5 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 import { Dropdown } from '@monitor/components/Dropdown';
 import { LoginScreen } from '@monitor/components/LoginScreen';
@@ -13,15 +15,13 @@ import { socket } from '@monitor/socket';
 import { api } from '@monitor/api';
 
 const Home = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [doors, setDoors] = useState<Door[]>([]);
   const [logs, setLogs] = useState<AccessLog[]>([]);
   const [currentDoor, setCurrentDoor] = useState(0);
 
   const getAvailableDoors = useCallback(() => {
-    setLoading(true);
-
     api
       .get<{ error: boolean; content: Door[] }>('/doors', {
         headers: {
@@ -34,8 +34,7 @@ const Home = () => {
         setDoors(doors);
         setCurrentDoor(doors[0].id);
       })
-      .catch(console.log)
-      .finally(() => setLoading(false));
+      .catch(console.log);
   }, [authUser]);
 
   const getAccessLogs = useCallback(
@@ -96,11 +95,40 @@ const Home = () => {
   }, [currentDoor]);
 
   useEffect(() => {
-    if (logs.length) {
-    }
-  }, [logs]);
+    const token = localStorage.getItem('auth_token');
 
-  if (!authUser) {
+    if (token) {
+      setLoading(true);
+
+      api
+        .get<{ error: boolean; content: AuthUser }>('/auth/verify', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => setAuthUser({ ...response.data.content, token }))
+        .catch(console.warn)
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <div className='flex h-screen w-screen justify-center items-center'>
+        <div className='flex flex-col items-center'>
+          <FontAwesomeIcon
+            icon={faSpinner}
+            className='mb-3'
+            size='3x'
+            spinPulse
+          />
+          <p className='text-2xl'>Cargando...</p>
+        </div>
+      </div>
+    );
+  } else if (!authUser) {
     return <LoginScreen onSuccessLogin={setAuthUser} />;
   }
 
