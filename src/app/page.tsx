@@ -65,6 +65,8 @@ const Home = () => {
           });
 
           setLogs([...(convertedData as AccessLog[])]);
+          // Join room
+          socket.emit('join-room', doorId);
         })
         .catch(console.log);
     },
