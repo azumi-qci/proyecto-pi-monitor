@@ -11,7 +11,12 @@ interface DropdownProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 const Dropdown: FC<DropdownProps> = ({ items, className, ...props }) => {
   return (
-    <select className={`px-4 py-2  ${className || ''}`} {...props}>
+    <select
+      className={`px-4 py-2 focus:outline focus:outline-neutral-50 ${
+        className || ''
+      }`}
+      {...props}
+    >
       {items.map((item) => (
         <option key={`item-${item.id}`} value={item.id}>
           {item.name}

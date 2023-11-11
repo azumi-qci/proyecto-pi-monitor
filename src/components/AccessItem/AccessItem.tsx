@@ -23,16 +23,16 @@ const AccessItem: FC<AccessItemProps> = ({
   };
 
   return (
-    <div className='flex gap-x-6 p-3 mb-2 border bg-neutral-50 hover:bg-neutral-100'>
+    <div className='flex gap-x-6 p-2 mb-2 border bg-neutral-50 hover:bg-neutral-100'>
       <p className='flex items-center justify-center w-1/12'>
         {getFormatedDate(entranceDay)}
       </p>
       <p className='flex items-center justify-center w-1/12'>{entranceHour}</p>
-      <p className='flex items-center justify-center w-4/12'>{name}</p>
-      <p className='flex items-center justify-center w-1/12'>{carBrand}</p>
+      <p className='flex items-center justify-center w-3/12'>{name}</p>
+      <p className='flex items-center justify-center w-2/12'>{carBrand}</p>
       <p className='flex items-center justify-center w-1/12'>{carColor}</p>
       <p className='flex items-center justify-center w-1/12'>{carPlate}</p>
-      <p className='flex items-center justify-center w-3/12'>{visitLocation}</p>
+      <p className='flex items-center justify-center w-2/12'>{visitLocation}</p>
       <p className='flex items-center justify-center w-1/12'>
         <Button>{checked ? 'Anular' : 'Acceso'}</Button>
       </p>

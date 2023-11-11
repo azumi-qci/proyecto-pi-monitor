@@ -6,6 +6,7 @@ import { LoginScreen } from '@monitor/components/LoginScreen';
 import { AccessItem } from '@monitor/components/AccessItem';
 import { LogoutButton } from '@monitor/components/LogoutButton';
 import { LoadingScreen } from '@monitor/components/LoadingScreen';
+import { AccessTitle } from '@monitor/components/AccessTitle';
 
 import { AccessLog } from '@monitor/interfaces/AccessLog';
 import { AuthUser } from '@monitor/interfaces/AuthUser';
@@ -179,7 +180,7 @@ const Home = () => {
   return (
     <div className='flex flex-col h-screen overflow-hidden'>
       {/* Header */}
-      <div className='flex bg-orange-600 text-neutral-50 text-center py-3 px-3 justify-between items-center'>
+      <div className='flex bg-orange-600 text-neutral-50 text-center py-3 px-3 justify-between items-center select-none'>
         {/* Log out button */}
         <LogoutButton onLogout={onLogout} />
         <h1
@@ -195,20 +196,22 @@ const Home = () => {
         />
       </div>
       {/* Content */}
-      <div className='flex flex-col flex-1 max-h-full mx-4 overflow-hidden'>
-        <div className='flex flex-col m-2 h-1/2'>
+      <div className='flex flex-col flex-1 max-h-full overflow-hidden'>
+        <div className='flex flex-col m-6 h-1/2'>
           <h2 className='mb-3 text-3xl font-bold border-b pb-2'>Activos</h2>
           <div className='max-h-full overflow-y-auto pr-2'>
+            <AccessTitle />
             {getLogs().map((item) => (
               <AccessItem key={`log-${item.id}`} {...item} />
             ))}
           </div>
         </div>
-        <div className='flex flex-col m-2 h-1/2'>
+        <div className='flex flex-col m-6 h-1/2'>
           <h2 className='mb-3 text-3xl font-bold border-b pb-2'>
             Expirados o anteriores
           </h2>
           <div className='max-h-full overflow-y-auto pr-2'>
+            <AccessTitle />
             {getLogs(true).map((item) => (
               <AccessItem key={`log-expired-${item.id}`} {...item} />
             ))}
