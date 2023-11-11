@@ -1,12 +1,11 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 import { Dropdown } from '@monitor/components/Dropdown';
 import { LoginScreen } from '@monitor/components/LoginScreen';
 import { AccessItem } from '@monitor/components/AccessItem';
 import { LogoutButton } from '@monitor/components/LogoutButton';
+import { LoadingScreen } from '@monitor/components/LoadingScreen';
 
 import { AccessLog } from '@monitor/interfaces/AccessLog';
 import { AuthUser } from '@monitor/interfaces/AuthUser';
@@ -172,19 +171,7 @@ const Home = () => {
   }, [logs]);
 
   if (loading) {
-    return (
-      <div className='flex h-screen w-screen justify-center items-center'>
-        <div className='flex flex-col items-center'>
-          <FontAwesomeIcon
-            icon={faSpinner}
-            className='mb-3'
-            size='3x'
-            spinPulse
-          />
-          <p className='text-2xl'>Cargando...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   } else if (!authUser) {
     return <LoginScreen onSuccessLogin={setAuthUser} />;
   }
@@ -193,8 +180,10 @@ const Home = () => {
     <div className='flex flex-col h-screen overflow-hidden'>
       {/* Header */}
       <div className='flex bg-orange-600 text-neutral-50 text-center py-3 px-3 justify-between items-center'>
+        {/* Log out button */}
+        <LogoutButton onLogout={onLogout} />
         <h1
-          className='font-bold text-3xl uppercase'
+          className='font-bold text-3xl uppercase mr-5'
           onClick={() => socket.emit('join-room', 1)}
         >
           Monitoreo de entrada - CUCEI
@@ -205,23 +194,21 @@ const Home = () => {
           onChange={(e) => setCurrentDoor(parseInt(e.target.value))}
         />
       </div>
-      {/* Log out button */}
-      <LogoutButton onLogout={onLogout} />
       {/* Content */}
-      <div className='flex flex-col flex-1 max-h-full overflow-hidden'>
+      <div className='flex flex-col flex-1 max-h-full mx-4 overflow-hidden'>
         <div className='flex flex-col m-2 h-1/2'>
-          <h2 className='mb-3 text-2xl font-bold border-b pb-2'>Activos</h2>
-          <div className='max-h-full overflow-y-auto'>
+          <h2 className='mb-3 text-3xl font-bold border-b pb-2'>Activos</h2>
+          <div className='max-h-full overflow-y-auto pr-2'>
             {getLogs().map((item) => (
               <AccessItem key={`log-${item.id}`} {...item} />
             ))}
           </div>
         </div>
         <div className='flex flex-col m-2 h-1/2'>
-          <h2 className='mb-3 text-2xl font-bold border-b pb-2'>
+          <h2 className='mb-3 text-3xl font-bold border-b pb-2'>
             Expirados o anteriores
           </h2>
-          <div className='max-h-full overflow-y-auto'>
+          <div className='max-h-full overflow-y-auto pr-2'>
             {getLogs(true).map((item) => (
               <AccessItem key={`log-expired-${item.id}`} {...item} />
             ))}
