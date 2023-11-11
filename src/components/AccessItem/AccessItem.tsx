@@ -1,12 +1,19 @@
 import { FC } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faSquareCheck,
+  faSquareXmark,
+  faCheck,
+  faX,
+} from '@fortawesome/free-solid-svg-icons';
 
-import { AccessLog } from '../../interfaces/AccessLog';
-import { Button } from '../Button';
+import { Button } from '@monitor/components/Button';
+
+import { AccessLog } from '@monitor/interfaces/AccessLog';
 
 interface AccessItemProps extends AccessLog {}
 
 const AccessItem: FC<AccessItemProps> = ({
-  id,
   name,
   entranceDay,
   entranceHour,
@@ -34,7 +41,13 @@ const AccessItem: FC<AccessItemProps> = ({
       <p className='flex items-center justify-center w-1/12'>{carPlate}</p>
       <p className='flex items-center justify-center w-2/12'>{visitLocation}</p>
       <p className='flex items-center justify-center w-1/12'>
-        <Button>{checked ? 'Anular' : 'Acceso'}</Button>
+        <Button>
+          {checked ? (
+            <FontAwesomeIcon icon={faX} size='lg' />
+          ) : (
+            <FontAwesomeIcon icon={faCheck} size='lg' />
+          )}
+        </Button>
       </p>
     </div>
   );
