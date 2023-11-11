@@ -15,6 +15,8 @@ import { Door } from '@monitor/interfaces/Door';
 import { socket } from '@monitor/socket';
 import { api } from '@monitor/api';
 
+import { toCamelCase } from '@monitor/helpers/toCamelCase';
+
 import config from '../../config.json';
 
 const Home = () => {
@@ -51,17 +53,7 @@ const Home = () => {
         .then((response) => {
           // Change variables from snake case to camel case
           const convertedData = response.data.content.map((item) => {
-            return {
-              name: item.name,
-              carBrand: item.car_brand,
-              carColor: item.car_color,
-              carPlate: item.car_plate,
-              entranceHour: item.entrance_hour,
-              entranceDay: item.entrance_day,
-              doorId: item.id_door,
-              visitLocation: item.visit_location,
-              checked: item.checked,
-            };
+            return toCamelCase(item);
           });
 
           setLogs([...(convertedData as AccessLog[])]);
@@ -108,6 +100,21 @@ const Home = () => {
     }
   }, [currentDoor]);
 
+  const onSocketUpdateLog = useCallback(
+    (updatedLog: AccessLog) => {
+      const logIndex = logs.findIndex((item) => item.id === updatedLog.id);
+
+      if (logIndex !== -1) {
+        const tempItem = { ...logs[logIndex], ...toCamelCase(updatedLog) };
+        const tempList = [...logs];
+        tempList.splice(logIndex, 1, tempItem);
+
+        setLogs([...tempList]);
+      }
+    },
+    [logs]
+  );
+
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
 
@@ -127,6 +134,14 @@ const Home = () => {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    socket.on('update-log', onSocketUpdateLog);
+
+    return () => {
+      socket.off('update-log', onSocketUpdateLog);
+    };
+  }, [logs]);
 
   if (loading) {
     return (
