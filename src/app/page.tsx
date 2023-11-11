@@ -6,6 +6,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { Dropdown } from '@monitor/components/Dropdown';
 import { LoginScreen } from '@monitor/components/LoginScreen';
 import { AccessItem } from '@monitor/components/AccessItem';
+import { LogoutButton } from '@monitor/components/LogoutButton';
 
 import { AccessLog } from '@monitor/interfaces/AccessLog';
 import { AuthUser } from '@monitor/interfaces/AuthUser';
@@ -13,6 +14,8 @@ import { Door } from '@monitor/interfaces/Door';
 
 import { socket } from '@monitor/socket';
 import { api } from '@monitor/api';
+
+import config from '../../config.json';
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -72,14 +75,23 @@ const Home = () => {
     const currentTime = new Date();
 
     return logs.filter((item) => {
-      const logTime = new Date(item.entranceHour);
-      const timeDiff = currentTime.valueOf() - logTime.valueOf();
+      const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
+      const timeDiff = Math.abs(currentTime.getTime() - logTime.getTime());
+      const timeDiffMin = Math.floor(timeDiff / 1000 / 60);
 
-      console.log(currentTime.valueOf(), logTime.valueOf());
-
-      return true;
+      return config.ALLOW_TIME_DIFFERENCE < timeDiffMin;
     });
   }, [logs]);
+
+  const onLogout = useCallback(() => {
+    // Delete token from localStorage
+    localStorage.removeItem('auth_token');
+    // Reset data
+    setAuthUser(null);
+    setDoors([]);
+    setCurrentDoor(0);
+    setLogs([]);
+  }, []);
 
   useEffect(() => {
     if (authUser) {
@@ -134,6 +146,8 @@ const Home = () => {
 
   return (
     <>
+      {/* Log out button */}
+      <LogoutButton onLogout={onLogout} />
       {/* Content */}
       <div className='flex flex-col h-screen'>
         {/* Header */}
@@ -160,7 +174,7 @@ const Home = () => {
           </div>
           <div className='flex flex-col m-2 h-1/2'>
             <h2 className='mb-3 text-2xl font-bold border-b pb-2'>
-              Caducados o anteriores
+              Expirados o anteriores
             </h2>
             {getExpiredLogs().map((item) => (
               <AccessItem key={`log-${item.id}`} {...item} />
