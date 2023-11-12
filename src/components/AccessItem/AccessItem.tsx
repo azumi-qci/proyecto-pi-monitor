@@ -1,19 +1,13 @@
 import { FC } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faSquareCheck,
-  faSquareXmark,
-  faCheck,
-  faX,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faX } from '@fortawesome/free-solid-svg-icons';
 
 import { Button } from '@monitor/components/Button';
 
 import { AccessLog } from '@monitor/interfaces/AccessLog';
 
 interface AccessItemProps extends AccessLog {
-  expired?: boolean;
-  setAccessLogAsChecked(id: number, doorId: number, remove?: boolean): void;
+  setAccessLogAsChecked(id: number, doorId: number): void;
 }
 
 const AccessItem: FC<AccessItemProps> = ({
@@ -27,7 +21,6 @@ const AccessItem: FC<AccessItemProps> = ({
   visitLocation,
   doorId,
   checked,
-  expired = false,
   setAccessLogAsChecked,
 }) => {
   const getFormatedDate = (date: string) => {
@@ -48,7 +41,7 @@ const AccessItem: FC<AccessItemProps> = ({
       <p className='flex items-center justify-center w-1/12'>{carPlate}</p>
       <p className='flex items-center justify-center w-2/12'>{visitLocation}</p>
       <p className='flex items-center justify-center w-1/12'>
-        <Button onClick={() => setAccessLogAsChecked(id, doorId, expired)}>
+        <Button onClick={() => setAccessLogAsChecked(id, doorId)}>
           {checked ? (
             <FontAwesomeIcon icon={faX} size='lg' />
           ) : (

@@ -174,10 +174,11 @@ const Home = () => {
    * now been registed or viceversa
    * @param id - Access log id
    * @param doorId - Door id of the access log
-   * @param remove - If `true`, the checked flag will be set to `0`
    */
   const setAccessLogAsChecked = useCallback(
-    (id: number, doorId: number, remove = false) => {
+    (id: number, doorId: number) => {
+      const remove = logs.find((item) => item.id === id)?.checked;
+
       if (!remove) {
         api
           .put(`/access/check/${doorId}/${id}`, null, {
@@ -198,7 +199,7 @@ const Home = () => {
           .catch(console.warn);
       }
     },
-    [authUser]
+    [logs, authUser]
   );
 
   useEffect(() => {
@@ -295,7 +296,6 @@ const Home = () => {
             <AccessTitle />
             {getLogs(true).map((item) => (
               <AccessItem
-                expired
                 key={`log-expired-${item.id}`}
                 setAccessLogAsChecked={setAccessLogAsChecked}
                 {...item}
