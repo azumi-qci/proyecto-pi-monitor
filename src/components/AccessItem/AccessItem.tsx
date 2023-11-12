@@ -11,9 +11,13 @@ import { Button } from '@monitor/components/Button';
 
 import { AccessLog } from '@monitor/interfaces/AccessLog';
 
-interface AccessItemProps extends AccessLog {}
+interface AccessItemProps extends AccessLog {
+  expired?: boolean;
+  setAccessLogAsChecked(id: number, doorId: number, remove?: boolean): void;
+}
 
 const AccessItem: FC<AccessItemProps> = ({
+  id,
   name,
   entranceDay,
   entranceHour,
@@ -21,7 +25,10 @@ const AccessItem: FC<AccessItemProps> = ({
   carColor,
   carPlate,
   visitLocation,
+  doorId,
   checked,
+  expired = false,
+  setAccessLogAsChecked,
 }) => {
   const getFormatedDate = (date: string) => {
     const myDate = new Date(date);
@@ -41,7 +48,7 @@ const AccessItem: FC<AccessItemProps> = ({
       <p className='flex items-center justify-center w-1/12'>{carPlate}</p>
       <p className='flex items-center justify-center w-2/12'>{visitLocation}</p>
       <p className='flex items-center justify-center w-1/12'>
-        <Button>
+        <Button onClick={() => setAccessLogAsChecked(id, doorId, expired)}>
           {checked ? (
             <FontAwesomeIcon icon={faX} size='lg' />
           ) : (

@@ -151,15 +151,15 @@ const Home = () => {
   );
 
   /**
-   * Sets the `checked` flag to `1` when received via socket (real time)
+   * Sets the `checked` flag to the new check state when received via socket (real time)
    */
   const onSocketCheckLog = useCallback(
-    (id: number) => {
+    ({ id, checked }: { id: number; checked: boolean }) => {
       const logIndex = logs.findIndex((item) => item.id === id);
 
       if (logIndex > -1) {
         const tempList = [...logs];
-        const tempItem = { ...logs[logIndex], checked: true };
+        const tempItem = { ...logs[logIndex], checked };
 
         tempList.splice(logIndex, 1, tempItem);
 
@@ -171,19 +171,32 @@ const Home = () => {
 
   /**
    * Tells the server that a access log has
-   * now been registed
+   * now been registed or viceversa
    * @param id - Access log id
+   * @param doorId - Door id of the access log
+   * @param remove - If `true`, the checked flag will be set to `0`
    */
   const setAccessLogAsChecked = useCallback(
-    (id: number, doorId: number) => {
-      api
-        .put(`/access/check/${doorId}/${id}`, null, {
-          headers: {
-            Authorization: `Bearer ${authUser?.token}`,
-          },
-        })
-        .then(console.log)
-        .catch(console.warn);
+    (id: number, doorId: number, remove = false) => {
+      if (!remove) {
+        api
+          .put(`/access/check/${doorId}/${id}`, null, {
+            headers: {
+              Authorization: `Bearer ${authUser?.token}`,
+            },
+          })
+          .then(console.log)
+          .catch(console.warn);
+      } else {
+        api
+          .delete(`/access/check/${doorId}/${id}`, {
+            headers: {
+              Authorization: `Bearer ${authUser?.token}`,
+            },
+          })
+          .then(console.log)
+          .catch(console.warn);
+      }
     },
     [authUser]
   );
@@ -225,11 +238,13 @@ const Home = () => {
     socket.on('update-log', onSocketUpdateLog);
     socket.on('add-log', onSocketAddLog);
     socket.on('check-log', onSocketCheckLog);
+    socket.on('uncheck-log', onSocketCheckLog);
 
     return () => {
       socket.off('update-log', onSocketUpdateLog);
       socket.off('update-log', onSocketAddLog);
       socket.off('check-log', onSocketCheckLog);
+      socket.off('uncheck-log', onSocketCheckLog);
     };
   }, [logs]);
 
@@ -264,7 +279,11 @@ const Home = () => {
           <div className='max-h-full overflow-y-auto pr-2'>
             <AccessTitle />
             {getLogs().map((item) => (
-              <AccessItem key={`log-${item.id}`} {...item} />
+              <AccessItem
+                key={`log-${item.id}`}
+                setAccessLogAsChecked={setAccessLogAsChecked}
+                {...item}
+              />
             ))}
           </div>
         </div>
@@ -275,7 +294,12 @@ const Home = () => {
           <div className='max-h-full overflow-y-auto pr-2'>
             <AccessTitle />
             {getLogs(true).map((item) => (
-              <AccessItem key={`log-expired-${item.id}`} {...item} />
+              <AccessItem
+                expired
+                key={`log-expired-${item.id}`}
+                setAccessLogAsChecked={setAccessLogAsChecked}
+                {...item}
+              />
             ))}
           </div>
         </div>
