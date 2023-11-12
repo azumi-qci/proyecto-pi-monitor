@@ -95,7 +95,7 @@ const Home = () => {
         const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
         const timeDiff = getTimeDifference(currentTime, logTime);
 
-        return config.ALLOW_TIME_DIFFERENCE > timeDiff && !item.checked;
+        return config.ALLOW_TIME_DIFFERENCE >= timeDiff && !item.checked;
       });
     },
     [logs]
