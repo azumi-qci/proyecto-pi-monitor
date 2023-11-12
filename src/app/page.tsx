@@ -17,6 +17,7 @@ import { api } from '@monitor/api';
 
 import { toCamelCase } from '@monitor/helpers/toCamelCase';
 import { getTimeDifference } from '@monitor/helpers/getTimeDifference';
+import { getLocalDate } from '@monitor/helpers/getLocalDate';
 
 import config from '../../config.json';
 
@@ -126,7 +127,11 @@ const Home = () => {
         const tempList = [...logs];
         const newItem = toCamelCase(updatedLog);
 
-        const tempItem = { ...logs[logIndex], ...newItem };
+        const tempItem = {
+          ...logs[logIndex],
+          ...newItem,
+          entranceDay: getLocalDate(newItem.entranceDay),
+        };
         tempList.splice(logIndex, 1, tempItem);
 
         setLogs([...tempList]);
