@@ -195,7 +195,7 @@ const Home = () => {
           .catch(console.warn);
       } else {
         api
-          .delete(`/access/check/${doorId}/${id}`, {
+          .put(`/access/uncheck/${doorId}/${id}`, null, {
             headers: {
               Authorization: `Bearer ${authUser?.token}`,
             },
