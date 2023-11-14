@@ -27,6 +27,7 @@ const Home = () => {
   const [doors, setDoors] = useState<Door[]>([]);
   const [logs, setLogs] = useState<AccessLog[]>([]);
   const [currentDoor, setCurrentDoor] = useState(0);
+  const [currentHour, setCurrentHour] = useState('00:00:00');
 
   /**
    * Fetches all the registered doors in database
@@ -66,7 +67,7 @@ const Home = () => {
             return toCamelCase(item);
           });
 
-          setLogs([...(convertedData as AccessLog[])]);
+          setLogs([...convertedData]);
           // Join room
           socket.emit('join-room', doorId);
         })
@@ -96,7 +97,7 @@ const Home = () => {
         const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
         const timeDiff = getTimeDifference(currentTime, logTime);
 
-        return config.ALLOW_TIME_DIFFERENCE >= timeDiff && !item.checked;
+        return config.ALLOW_TIME_DIFFERENCE;
       });
     },
     [logs]
@@ -254,6 +255,16 @@ const Home = () => {
     };
   }, [logs]);
 
+  useEffect(() => {
+    const timerInvertal = setInterval(() => {
+      setCurrentHour(new Date().toLocaleTimeString());
+    }, 1000);
+
+    return () => {
+      clearInterval(timerInvertal);
+    };
+  }, []);
+
   if (loading) {
     return <LoadingScreen />;
   } else if (!authUser) {
@@ -267,7 +278,7 @@ const Home = () => {
         {/* Log out button */}
         <LogoutButton onLogout={onLogout} />
         <h1
-          className='font-bold text-3xl uppercase mr-5'
+          className='font-bold text-5xl uppercase mr-5'
           onClick={() => socket.emit('join-room', 1)}
         >
           Monitoreo de entrada - CUCEI
@@ -280,6 +291,9 @@ const Home = () => {
       </div>
       {/* Content */}
       <div className='flex flex-col flex-1 max-h-full overflow-hidden'>
+        <h2 className='text-5xl py-3 px-4 font-bold text-center'>
+          {currentHour}
+        </h2>
         <div className='flex flex-col m-6 h-1/2'>
           <h2 className='mb-3 text-3xl font-bold border-b pb-2'>Activos</h2>
           <div className='max-h-full overflow-y-auto pr-2'>
