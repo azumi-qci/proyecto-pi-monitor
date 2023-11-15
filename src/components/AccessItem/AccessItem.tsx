@@ -6,8 +6,7 @@ interface AccessItemProps extends AccessLogWithStatus {}
 
 const AccessItem: FC<AccessItemProps> = ({
   name,
-  entranceDay,
-  entranceHour,
+  accessDaytime,
   carBrand,
   carColor,
   carPlate,
@@ -17,7 +16,13 @@ const AccessItem: FC<AccessItemProps> = ({
   const getFormatedDate = (date: string) => {
     const myDate = new Date(date);
 
-    return `${myDate.toLocaleDateString()}`;
+    return myDate.toLocaleDateString();
+  };
+
+  const getFormatedHour = (date: string) => {
+    const myDate = new Date(date);
+
+    return myDate.toLocaleTimeString();
   };
 
   const getStatus = (status: Status) => {
@@ -54,9 +59,11 @@ const AccessItem: FC<AccessItemProps> = ({
         {getStatus(status)}
       </p>
       <p className='flex items-center justify-center w-1/12'>
-        {getFormatedDate(entranceDay)}
+        {getFormatedDate(accessDaytime)}
       </p>
-      <p className='flex items-center justify-center w-1/12'>{entranceHour}</p>
+      <p className='flex items-center justify-center w-1/12'>
+        {getFormatedHour(accessDaytime)}
+      </p>
       <p className='flex items-center justify-center w-3/12'>{name}</p>
       <p className='flex items-center justify-center w-2/12'>{carBrand}</p>
       <p className='flex items-center justify-center w-1/12'>{carColor}</p>

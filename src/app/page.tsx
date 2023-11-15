@@ -87,10 +87,8 @@ const Home = () => {
     const currentTime = new Date();
 
     return logs.map<AccessLogWithStatus>((item) => {
-      const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
+      const logTime = new Date(item.accessDaytime);
       const diff = getTimeDifference(currentTime, logTime);
-
-      console.log(diff);
 
       if (diff <= 0) {
         return { ...item, status: Status.ON_TIME };
@@ -141,7 +139,6 @@ const Home = () => {
         const tempItem = {
           ...logs[logIndex],
           ...newItem,
-          entranceDay: getLocalDate(newItem.entranceDay),
         };
         tempList.splice(logIndex, 1, tempItem);
 
@@ -160,6 +157,12 @@ const Home = () => {
       const newItem = toCamelCase(newLog);
 
       tempList.push(newItem);
+      // Sort by date when added a new log
+      tempList.sort(
+        (a, b) =>
+          new Date(b.accessDaytime).getTime() -
+          new Date(a.accessDaytime).getTime()
+      );
 
       setLogs([...tempList]);
     },
