@@ -228,7 +228,7 @@ const Home = () => {
   return (
     <div className='flex flex-col h-screen overflow-hidden'>
       {/* Header */}
-      <div className='flex bg-orange-600 text-neutral-50 text-center py-3 px-3 justify-between items-center select-none'>
+      <div className='flex bg-orange-500 text-neutral-50 text-center py-3 px-3 justify-between items-center select-none'>
         {/* Log out button */}
         <LogoutButton onLogout={onLogout} />
         <h1
