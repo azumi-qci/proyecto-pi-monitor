@@ -8,7 +8,11 @@ import { LogoutButton } from '@monitor/components/LogoutButton';
 import { LoadingScreen } from '@monitor/components/LoadingScreen';
 import { AccessTitle } from '@monitor/components/AccessTitle';
 
-import { AccessLog } from '@monitor/interfaces/AccessLog';
+import {
+  AccessLog,
+  AccessLogWithStatus,
+  Status,
+} from '@monitor/interfaces/AccessLog';
 import { AuthUser } from '@monitor/interfaces/AuthUser';
 import { Door } from '@monitor/interfaces/Door';
 
@@ -26,7 +30,7 @@ const Home = () => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [doors, setDoors] = useState<Door[]>([]);
   const [logs, setLogs] = useState<AccessLog[]>([]);
-  const [currentDoor, setCurrentDoor] = useState(0);
+  const [currentDoor, setCurrentDoor] = useState<Door | null>(null);
   const [currentHour, setCurrentHour] = useState('00:00:00');
 
   /**
@@ -44,7 +48,7 @@ const Home = () => {
         const doors = response.data.content;
 
         setDoors(doors);
-        setCurrentDoor(doors[0].id);
+        setCurrentDoor(doors[0]);
       })
       .catch(console.log);
   }, [authUser]);
@@ -78,30 +82,25 @@ const Home = () => {
 
   /**
    * Returns a list of available access logs of the current door
-   * @param expired - If `true`, only expired or previusly accessed logs will be returned
    */
-  const getLogs = useCallback(
-    (expired = false) => {
-      const currentTime = new Date();
+  const getLogs = useCallback(() => {
+    const currentTime = new Date();
 
-      if (expired) {
-        return logs.filter((item) => {
-          const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
-          const timeDiff = getTimeDifference(currentTime, logTime);
+    return logs.map<AccessLogWithStatus>((item) => {
+      const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
+      const diff = getTimeDifference(currentTime, logTime);
 
-          return config.ALLOW_TIME_DIFFERENCE < timeDiff || item.checked;
-        });
+      console.log(diff);
+
+      if (diff <= 0) {
+        return { ...item, status: Status.ON_TIME };
+      } else if (diff < config.ALLOW_TIME_DIFFERENCE) {
+        return { ...item, status: Status.NEAR_TIME };
       }
 
-      return logs.filter((item) => {
-        const logTime = new Date(`${item.entranceDay} ${item.entranceHour}`);
-        const timeDiff = getTimeDifference(currentTime, logTime);
-
-        return config.ALLOW_TIME_DIFFERENCE;
-      });
-    },
-    [logs]
-  );
+      return { ...item, status: Status.EXPIRED };
+    });
+  }, [logs]);
 
   /**
    * Resets all the application state when the user
@@ -113,8 +112,19 @@ const Home = () => {
     // Reset data
     setAuthUser(null);
     setDoors([]);
-    setCurrentDoor(0);
+    setCurrentDoor(null);
     setLogs([]);
+  }, []);
+
+  /**
+   * Changes the current displayed door
+   */
+  const onChangeDoor = useCallback((doorId: number) => {
+    const doorIndex = doors.findIndex((item) => item.id === doorId);
+
+    if (doorIndex > -1) {
+      setCurrentDoor(doors[doorIndex]);
+    }
   }, []);
 
   /**
@@ -156,58 +166,6 @@ const Home = () => {
     [logs]
   );
 
-  /**
-   * Sets the `checked` flag to the new check state when received via socket (real time)
-   */
-  const onSocketCheckLog = useCallback(
-    ({ id, checked }: { id: number; checked: boolean }) => {
-      const logIndex = logs.findIndex((item) => item.id === id);
-
-      if (logIndex > -1) {
-        const tempList = [...logs];
-        const tempItem = { ...logs[logIndex], checked };
-
-        tempList.splice(logIndex, 1, tempItem);
-
-        setLogs([...tempList]);
-      }
-    },
-    [logs]
-  );
-
-  /**
-   * Tells the server that a access log has
-   * now been registed or viceversa
-   * @param id - Access log id
-   * @param doorId - Door id of the access log
-   */
-  const setAccessLogAsChecked = useCallback(
-    (id: number, doorId: number) => {
-      const remove = logs.find((item) => item.id === id)?.checked;
-
-      if (!remove) {
-        api
-          .put(`/access/check/${doorId}/${id}`, null, {
-            headers: {
-              Authorization: `Bearer ${authUser?.token}`,
-            },
-          })
-          .then(console.log)
-          .catch(console.warn);
-      } else {
-        api
-          .put(`/access/uncheck/${doorId}/${id}`, null, {
-            headers: {
-              Authorization: `Bearer ${authUser?.token}`,
-            },
-          })
-          .then(console.log)
-          .catch(console.warn);
-      }
-    },
-    [logs, authUser]
-  );
-
   useEffect(() => {
     if (authUser) {
       // Get initial data
@@ -216,8 +174,8 @@ const Home = () => {
   }, [authUser]);
 
   useEffect(() => {
-    if (currentDoor > 0) {
-      fetchAccessLogs(currentDoor);
+    if (currentDoor) {
+      fetchAccessLogs(currentDoor.id);
     }
   }, [currentDoor]);
 
@@ -244,14 +202,10 @@ const Home = () => {
   useEffect(() => {
     socket.on('update-log', onSocketUpdateLog);
     socket.on('add-log', onSocketAddLog);
-    socket.on('check-log', onSocketCheckLog);
-    socket.on('uncheck-log', onSocketCheckLog);
 
     return () => {
       socket.off('update-log', onSocketUpdateLog);
       socket.off('update-log', onSocketAddLog);
-      socket.off('check-log', onSocketCheckLog);
-      socket.off('uncheck-log', onSocketCheckLog);
     };
   }, [logs]);
 
@@ -286,41 +240,24 @@ const Home = () => {
         <Dropdown
           className='text-neutral-800'
           items={doors}
-          onChange={(e) => setCurrentDoor(parseInt(e.target.value))}
+          onChange={(e) => onChangeDoor(parseInt(e.currentTarget.value))}
         />
       </div>
       {/* Content */}
-      <div className='flex flex-col flex-1 max-h-full overflow-hidden'>
-        <h2 className='text-5xl py-3 px-4 font-bold text-center'>
-          {currentHour}
-        </h2>
-        <div className='flex flex-col m-6 h-1/2'>
-          <h2 className='mb-3 text-3xl font-bold border-b pb-2'>Activos</h2>
-          <div className='max-h-full overflow-y-auto pr-2'>
-            <AccessTitle />
-            {getLogs().map((item) => (
-              <AccessItem
-                key={`log-${item.id}`}
-                setAccessLogAsChecked={setAccessLogAsChecked}
-                {...item}
-              />
-            ))}
-          </div>
-        </div>
-        <div className='flex flex-col m-6 h-1/2'>
-          <h2 className='mb-3 text-3xl font-bold border-b pb-2'>
-            Expirados o anteriores
+      <div className='flex flex-col flex-1 max-h-full overflow-hidden mx-6'>
+        <div className='flex justify-between my-6'>
+          <h2 className='text-5xl py-3 px-4 font-bold text-center'>
+            {currentDoor?.name || ''}
           </h2>
-          <div className='max-h-full overflow-y-auto pr-2'>
-            <AccessTitle />
-            {getLogs(true).map((item) => (
-              <AccessItem
-                key={`log-expired-${item.id}`}
-                setAccessLogAsChecked={setAccessLogAsChecked}
-                {...item}
-              />
-            ))}
-          </div>
+          <h2 className='text-5xl py-3 px-4 font-bold text-center'>
+            {currentHour}
+          </h2>
+        </div>
+        <div className='max-h-full overflow-y-auto'>
+          <AccessTitle />
+          {getLogs().map((item) => (
+            <AccessItem key={`log-${item.id}`} {...item} />
+          ))}
         </div>
       </div>
     </div>

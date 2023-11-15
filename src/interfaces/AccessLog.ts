@@ -10,3 +10,13 @@ export interface AccessLog {
   visitLocation: string;
   checked: boolean;
 }
+
+export interface AccessLogWithStatus extends AccessLog {
+  status: Status;
+}
+
+export enum Status {
+  ON_TIME,
+  NEAR_TIME,
+  EXPIRED,
+}

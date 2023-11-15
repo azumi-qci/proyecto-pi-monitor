@@ -58,7 +58,7 @@ const LoginScreen: FC<LoginScreenProps> = ({ onSuccessLogin }) => {
 
   return (
     <div className='flex w-screen h-screen justify-center items-center'>
-      <div className='px-6 py-4 shadow-2xl w-full max-w-sm'>
+      <div className='px-6 py-4 shadow-2xl w-full max-w-sm rounded'>
         <h2 className='font-bold uppercase text-center text-2xl pb-6 mb-6 border-b-2 text-neutral-800'>
           <FontAwesomeIcon icon={faKey} className='mr-2' />
           Iniciar sesión

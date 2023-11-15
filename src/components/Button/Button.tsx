@@ -12,7 +12,7 @@ const Button: FC<ButtonProps> = ({
 }) => {
   return (
     <button
-      className={`px-4 py-2 border ${
+      className={`px-4 py-2 border rounded ${
         outline
           ? 'bg-neutral-50 text-orange-600 hover:bg-neutral-100 border-orange-600'
           : 'bg-orange-600 text-neutral-50 hover:bg-orange-500 border-neutral-50'
