@@ -21,7 +21,6 @@ import { api } from '@monitor/api';
 
 import { toCamelCase } from '@monitor/helpers/toCamelCase';
 import { getTimeDifference } from '@monitor/helpers/getTimeDifference';
-import { getLocalDate } from '@monitor/helpers/getLocalDate';
 
 import config from '../../config.json';
 
@@ -29,7 +28,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [doors, setDoors] = useState<Door[]>([]);
-  const [logs, setLogs] = useState<AccessLog[]>([]);
+  const [accessLogs, setAccessLogs] = useState<AccessLog[]>([]);
   const [currentDoor, setCurrentDoor] = useState<Door | null>(null);
   const [currentHour, setCurrentHour] = useState('00:00:00');
 
@@ -71,7 +70,7 @@ const Home = () => {
             return toCamelCase(item);
           });
 
-          setLogs([...convertedData]);
+          setAccessLogs([...convertedData]);
           // Join room
           socket.emit('join-room', doorId);
         })
@@ -86,7 +85,7 @@ const Home = () => {
   const getLogs = useCallback(() => {
     const currentTime = new Date();
 
-    return logs.map<AccessLogWithStatus>((item) => {
+    return accessLogs.map<AccessLogWithStatus>((item) => {
       const logTime = new Date(item.accessDaytime);
       const diff = getTimeDifference(currentTime, logTime);
 
@@ -98,7 +97,7 @@ const Home = () => {
 
       return { ...item, status: Status.EXPIRED };
     });
-  }, [logs]);
+  }, [accessLogs]);
 
   /**
    * Resets all the application state when the user
@@ -111,7 +110,7 @@ const Home = () => {
     setAuthUser(null);
     setDoors([]);
     setCurrentDoor(null);
-    setLogs([]);
+    setAccessLogs([]);
   }, []);
 
   /**
@@ -127,21 +126,22 @@ const Home = () => {
 
   /**
    * Add a new access log when received via socket (real time)
+   * @param updatedLog - Updated data of the access log
    */
   const onSocketUpdateLog = (updatedLog: AccessLog) => {
-    const logIndex = logs.findIndex((item) => item.id === updatedLog.id);
+    const logIndex = accessLogs.findIndex((item) => item.id === updatedLog.id);
 
     if (logIndex > -1) {
-      const tempList = [...logs];
+      const tempList = [...accessLogs];
       const newItem = toCamelCase(updatedLog);
 
       const tempItem = {
-        ...logs[logIndex],
+        ...accessLogs[logIndex],
         ...newItem,
       };
       tempList.splice(logIndex, 1, tempItem);
 
-      setLogs([...tempList]);
+      setAccessLogs(tempList);
     }
   };
 
@@ -150,7 +150,7 @@ const Home = () => {
    * @param newLog - New access log data
    */
   const onSocketAddLog = (newLog: AccessLog) => {
-    const tempList = [...logs];
+    const tempList = [...accessLogs];
     const newItem = toCamelCase(newLog);
 
     tempList.push(newItem);
@@ -161,7 +161,7 @@ const Home = () => {
         new Date(a.accessDaytime).getTime()
     );
 
-    setLogs([...tempList]);
+    setAccessLogs(tempList);
   };
 
   /**
@@ -169,14 +169,14 @@ const Home = () => {
    * @param id - Unique ID of the deleted access log
    */
   const onSocketDeleteLog = (id: number) => {
-    const itemIndex = logs.findIndex((item) => item.id === id);
+    const itemIndex = accessLogs.findIndex((item) => item.id === id);
 
     if (itemIndex > -1) {
-      const tempList = [...logs];
+      const tempList = [...accessLogs];
       // Delete from temporal list
       tempList.splice(itemIndex, 1);
 
-      setLogs(tempList);
+      setAccessLogs(tempList);
     }
   };
 
@@ -223,7 +223,7 @@ const Home = () => {
       socket.off('update-log', onSocketAddLog);
       socket.off('delete-log', onSocketDeleteLog);
     };
-  }, [logs]);
+  }, [accessLogs]);
 
   useEffect(() => {
     const timerInvertal = setInterval(() => {
