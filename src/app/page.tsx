@@ -128,46 +128,57 @@ const Home = () => {
   /**
    * Add a new access log when received via socket (real time)
    */
-  const onSocketUpdateLog = useCallback(
-    (updatedLog: AccessLog) => {
-      const logIndex = logs.findIndex((item) => item.id === updatedLog.id);
+  const onSocketUpdateLog = (updatedLog: AccessLog) => {
+    const logIndex = logs.findIndex((item) => item.id === updatedLog.id);
 
-      if (logIndex > -1) {
-        const tempList = [...logs];
-        const newItem = toCamelCase(updatedLog);
-
-        const tempItem = {
-          ...logs[logIndex],
-          ...newItem,
-        };
-        tempList.splice(logIndex, 1, tempItem);
-
-        setLogs([...tempList]);
-      }
-    },
-    [logs]
-  );
-
-  /**
-   * Updates a accses log when received via socket (real time)
-   */
-  const onSocketAddLog = useCallback(
-    (newLog: AccessLog) => {
+    if (logIndex > -1) {
       const tempList = [...logs];
-      const newItem = toCamelCase(newLog);
+      const newItem = toCamelCase(updatedLog);
 
-      tempList.push(newItem);
-      // Sort by date when added a new log
-      tempList.sort(
-        (a, b) =>
-          new Date(b.accessDaytime).getTime() -
-          new Date(a.accessDaytime).getTime()
-      );
+      const tempItem = {
+        ...logs[logIndex],
+        ...newItem,
+      };
+      tempList.splice(logIndex, 1, tempItem);
 
       setLogs([...tempList]);
-    },
-    [logs]
-  );
+    }
+  };
+
+  /**
+   * Updates a access log when received via socket (real time)
+   * @param newLog - New access log data
+   */
+  const onSocketAddLog = (newLog: AccessLog) => {
+    const tempList = [...logs];
+    const newItem = toCamelCase(newLog);
+
+    tempList.push(newItem);
+    // Sort by date when added a new log
+    tempList.sort(
+      (a, b) =>
+        new Date(b.accessDaytime).getTime() -
+        new Date(a.accessDaytime).getTime()
+    );
+
+    setLogs([...tempList]);
+  };
+
+  /**
+   * Deletes a access log when received via socket (real time)
+   * @param id - Unique ID of the deleted access log
+   */
+  const onSocketDeleteLog = (id: number) => {
+    const itemIndex = logs.findIndex((item) => item.id === id);
+
+    if (itemIndex > -1) {
+      const tempList = [...logs];
+      // Delete from temporal list
+      tempList.splice(itemIndex, 1);
+
+      setLogs(tempList);
+    }
+  };
 
   useEffect(() => {
     if (authUser) {
@@ -205,10 +216,12 @@ const Home = () => {
   useEffect(() => {
     socket.on('update-log', onSocketUpdateLog);
     socket.on('add-log', onSocketAddLog);
+    socket.on('delete-log', onSocketDeleteLog);
 
     return () => {
       socket.off('update-log', onSocketUpdateLog);
       socket.off('update-log', onSocketAddLog);
+      socket.off('delete-log', onSocketDeleteLog);
     };
   }, [logs]);
 
