@@ -233,7 +233,7 @@ const Home = () => {
         />
       </div>
       {/* Content */}
-      <div className='flex flex-col flex-1 max-h-full overflow-hidden mx-6'>
+      <div className='flex flex-col flex-1 max-h-full mx-6'>
         <div className='flex justify-between my-6'>
           <h2 className='text-5xl py-3 px-4 font-bold text-center'>
             {currentDoor?.name || ''}
@@ -242,7 +242,7 @@ const Home = () => {
             {currentHour}
           </h2>
         </div>
-        <div className='flex'>
+        <div className='flex flex-1'>
           <AccessLogPanel type={Status.PASSED} data={accessLogs} />
           <AccessLogPanel type={Status.ON_TIME} data={accessLogs} />
           <AccessLogPanel type={Status.NEXT} data={accessLogs} />

@@ -48,7 +48,7 @@ const AccessLogPanel: FC<AccessLogPanelProps> = ({ data, type }) => {
   };
 
   return (
-    <div className='flex-1 p-4 mx-2 border rounded'>
+    <div className='flex-1 flex-col p-4 mx-2 border rounded'>
       <h3 className='text-3xl mb-4'>{getPanelTitle()}</h3>
       {getFilteredData().map((item) => (
         <div
