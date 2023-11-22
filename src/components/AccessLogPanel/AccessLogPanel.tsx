@@ -25,7 +25,7 @@ const AccessLogPanel: FC<AccessLogPanelProps> = ({ data, type }) => {
       } else if (type === Status.PASSED) {
         return (
           timeDiff <= -config.PREVIOUS_TIME_MIN &&
-          Math.abs(timeDiff) > config.PREVIOUS_TIME_MIN * 2
+          Math.abs(timeDiff) < config.NEXT_TIME_MAX
         );
       } else {
         return (
