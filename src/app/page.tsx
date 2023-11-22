@@ -6,11 +6,7 @@ import { LoginScreen } from '@monitor/components/LoginScreen';
 import { LogoutButton } from '@monitor/components/LogoutButton';
 import { LoadingScreen } from '@monitor/components/LoadingScreen';
 
-import {
-  AccessLog,
-  AccessLogWithStatus,
-  Status,
-} from '@monitor/interfaces/AccessLog';
+import { AccessLog, Status } from '@monitor/interfaces/AccessLog';
 import { AuthUser } from '@monitor/interfaces/AuthUser';
 import { Door } from '@monitor/interfaces/Door';
 
@@ -18,9 +14,7 @@ import { socket } from '@monitor/socket';
 import { api } from '@monitor/api';
 
 import { toCamelCase } from '@monitor/helpers/toCamelCase';
-import { getTimeDifference } from '@monitor/helpers/getTimeDifference';
 
-import config from '../../config.json';
 import { AccessLogPanel } from '../components/AccessLogPanel';
 
 const Home = () => {

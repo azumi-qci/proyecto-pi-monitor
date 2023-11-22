@@ -1,7 +1,7 @@
 import { FC } from 'react';
 
-import { AccessLog, Status } from '../../interfaces/AccessLog';
-import { getTimeDifference } from '../../helpers/getTimeDifference';
+import { AccessLog, Status } from '@monitor/interfaces/AccessLog';
+import { getTimeDifference } from '@monitor/helpers/getTimeDifference';
 
 import config from '../../../config.json';
 
