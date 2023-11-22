@@ -27,9 +27,9 @@ const AccessItem: FC<AccessItemProps> = ({
 
   const getStatus = (status: Status) => {
     switch (status) {
-      case Status.EXPIRED:
+      case Status.PASSED:
         return 'Expirado';
-      case Status.NEAR_TIME:
+      case Status.NEXT:
         return 'Atrasado';
       case Status.ON_TIME:
       default:
@@ -39,9 +39,9 @@ const AccessItem: FC<AccessItemProps> = ({
 
   const getStatusColor = (status: Status) => {
     switch (status) {
-      case Status.EXPIRED:
+      case Status.PASSED:
         return 'bg-red-300';
-      case Status.NEAR_TIME:
+      case Status.NEXT:
         return 'bg-amber-300';
       case Status.ON_TIME:
       default:

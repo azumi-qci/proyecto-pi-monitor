@@ -16,6 +16,6 @@ export interface AccessLogWithStatus extends AccessLog {
 
 export enum Status {
   ON_TIME,
-  NEAR_TIME,
-  EXPIRED,
+  NEXT,
+  PASSED,
 }

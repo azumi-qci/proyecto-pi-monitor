@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { FC, useCallback, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faKey, faSpinner } from '@fortawesome/free-solid-svg-icons';
@@ -57,8 +58,23 @@ const LoginScreen: FC<LoginScreenProps> = ({ onSuccessLogin }) => {
   }, [data]);
 
   return (
-    <div className='flex w-screen h-screen justify-center items-center'>
-      <div className='px-6 py-4 shadow-2xl w-full max-w-sm rounded'>
+    <div
+      className='flex w-screen h-screen justify-center items-center'
+      style={{
+        backgroundImage: `url('background.jpg')`,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+      }}
+    >
+      <div className='px-6 py-4 shadow-2xl w-full max-w-sm rounded bg-neutral-50'>
+        <div className='flex justify-center mb-4'>
+          <Image
+            src='/cucei-logo.png'
+            alt='Logo de CUCEI'
+            width={150}
+            height={0}
+          />
+        </div>
         <h2 className='font-bold uppercase text-center text-2xl pb-6 mb-6 border-b-2 text-neutral-800'>
           <FontAwesomeIcon icon={faKey} className='mr-2' />
           Iniciar sesión

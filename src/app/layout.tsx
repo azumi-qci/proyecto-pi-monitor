@@ -5,7 +5,7 @@ import './globals.css';
 const inter = Montserrat({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Monitoreo de entrada - CUCEI',
+  title: 'Monitoreo de acceso CUCEI',
   description:
     'Aplicación para el monitoreo de la entrada de automóviles en CUCEI',
 };

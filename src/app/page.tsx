@@ -23,6 +23,7 @@ import { toCamelCase } from '@monitor/helpers/toCamelCase';
 import { getTimeDifference } from '@monitor/helpers/getTimeDifference';
 
 import config from '../../config.json';
+import { AccessLogPanel } from '../components/AccessLogPanel';
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -92,10 +93,10 @@ const Home = () => {
       if (diff <= 0) {
         return { ...item, status: Status.ON_TIME };
       } else if (diff < config.ALLOW_TIME_DIFFERENCE) {
-        return { ...item, status: Status.NEAR_TIME };
+        return { ...item, status: Status.NEXT };
       }
 
-      return { ...item, status: Status.EXPIRED };
+      return { ...item, status: Status.PASSED };
     });
   }, [accessLogs]);
 
@@ -244,14 +245,14 @@ const Home = () => {
   return (
     <div className='flex flex-col h-screen overflow-hidden'>
       {/* Header */}
-      <div className='flex bg-orange-500 text-neutral-50 text-center py-3 px-3 justify-between items-center select-none'>
+      <div className='flex bg-orange-500 text-neutral-50 text-center py-6 px-3 justify-between items-center select-none'>
         {/* Log out button */}
         <LogoutButton onLogout={onLogout} />
         <h1
           className='font-bold text-5xl uppercase mr-5'
           onClick={() => socket.emit('join-room', 1)}
         >
-          Monitoreo de entrada - CUCEI
+          Monitoreo de acceso CUCEI
         </h1>
         <Dropdown
           className='text-neutral-800'
@@ -269,11 +270,10 @@ const Home = () => {
             {currentHour}
           </h2>
         </div>
-        <div className='max-h-full overflow-y-auto'>
-          <AccessTitle />
-          {getLogs().map((item) => (
-            <AccessItem key={`log-${item.id}`} {...item} />
-          ))}
+        <div className='flex'>
+          <AccessLogPanel type={Status.PASSED} data={accessLogs} />
+          <AccessLogPanel type={Status.ON_TIME} data={accessLogs} />
+          <AccessLogPanel type={Status.NEXT} data={accessLogs} />
         </div>
       </div>
     </div>
