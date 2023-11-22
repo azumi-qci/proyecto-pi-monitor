@@ -23,7 +23,10 @@ const AccessLogPanel: FC<AccessLogPanelProps> = ({ data, type }) => {
           timeDiff <= config.NEXT_TIME_MAX && timeDiff > config.ON_TIME_MIN
         );
       } else if (type === Status.PASSED) {
-        return timeDiff <= -config.PREVIOUS_TIME_MIN;
+        return (
+          timeDiff <= -config.PREVIOUS_TIME_MIN &&
+          Math.abs(timeDiff) > config.PREVIOUS_TIME_MIN * 2
+        );
       } else {
         return (
           timeDiff <= config.ON_TIME_MIN && timeDiff > -config.PREVIOUS_TIME_MIN
@@ -49,7 +52,7 @@ const AccessLogPanel: FC<AccessLogPanelProps> = ({ data, type }) => {
       <h3 className='text-3xl mb-4'>{getPanelTitle()}</h3>
       {getFilteredData().map((item) => (
         <div
-          className={`flex border p-4 rounded shadow-lg ${
+          className={`flex border p-4 rounded shadow-lg mb-4 ${
             type === Status.PASSED ? 'bg-amber-200' : 'bg-neutral-50'
           }`}
           key={item.id}

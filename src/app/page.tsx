@@ -79,26 +79,6 @@ const Home = () => {
   );
 
   /**
-   * Returns a list of available access logs of the current door
-   */
-  const getLogs = useCallback(() => {
-    const currentTime = new Date();
-
-    return accessLogs.map<AccessLogWithStatus>((item) => {
-      const logTime = new Date(item.accessDaytime);
-      const diff = getTimeDifference(currentTime, logTime);
-
-      if (diff <= 0) {
-        return { ...item, status: Status.ON_TIME };
-      } else if (diff < config.ALLOW_TIME_DIFFERENCE) {
-        return { ...item, status: Status.NEXT };
-      }
-
-      return { ...item, status: Status.PASSED };
-    });
-  }, [accessLogs]);
-
-  /**
    * Resets all the application state when the user
    * logs out of the system
    */
