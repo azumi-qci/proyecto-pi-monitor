@@ -3,10 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { Dropdown } from '@monitor/components/Dropdown';
 import { LoginScreen } from '@monitor/components/LoginScreen';
-import { AccessItem } from '@monitor/components/AccessItem';
 import { LogoutButton } from '@monitor/components/LogoutButton';
 import { LoadingScreen } from '@monitor/components/LoadingScreen';
-import { AccessTitle } from '@monitor/components/AccessTitle';
 
 import {
   AccessLog,
