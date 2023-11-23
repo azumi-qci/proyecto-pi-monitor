@@ -89,13 +89,13 @@ const Home = () => {
   /**
    * Changes the current displayed door
    */
-  const onChangeDoor = useCallback((doorId: number) => {
+  const onChangeDoor = (doorId: number) => {
     const doorIndex = doors.findIndex((item) => item.id === doorId);
 
     if (doorIndex > -1) {
       setCurrentDoor(doors[doorIndex]);
     }
-  }, []);
+  };
 
   /**
    * Add a new access log when received via socket (real time)
